@@ -1,0 +1,72 @@
+# Conditions pack: what the user said, signed inside the mandate, against what the merchant signed in its checkout.
+# Without these, "does this action honour the mandate?" only covers price, merchant and items.
+pack: conditions
+version: 2
+owner: risk-and-compliance
+approved_by: head-of-payments-risk
+effective: 2026-10-14
+description: Signed intent, delivery address, delivery deadline, item condition and seller rating.
+rules:
+  - id: conditions.not_signed
+    title: Conditions not signed
+    outcome: ESCALATE
+    rank: 34
+    when: "!cond.present"
+    reason: "Mandate carries no signed conditions; customer confirmation required."
+
+  - id: conditions.intent_mismatch
+    title: Request text mismatch
+    outcome: DENY
+    rank: 7
+    when: "cond.present && (!cond.intent_matches || !cond.summary_matches)"
+    reason: "Request text on file does not match the signed commitment."
+
+  - id: conditions.ship_to_missing
+    title: Ship-to address not stated
+    outcome: DENY
+    rank: 18
+    when: "cond.ship_to_required && !cond.ship_to_stated"
+    reason: "{cart.merchant.name}'s signed checkout states no ship-to address; the mandate requires one."
+
+  - id: conditions.ship_to_changed
+    title: Ship-to address mismatch
+    outcome: DENY
+    rank: 16
+    when: "cond.ship_to_required && cond.ship_to_stated && !cond.ship_to_matches"
+    reason: "Ship-to address in {cart.merchant.name}'s signed checkout differs from the signed address."
+
+  - id: conditions.no_delivery_promise
+    title: Delivery date not stated
+    outcome: DENY
+    rank: 23
+    when: "cond.deliver_by != '' && cond.promised_by == ''"
+    reason: "Signed checkout states no delivery date; delivery required by {cond.deliver_by|date}."
+
+  - id: conditions.late_delivery
+    title: Delivery after deadline
+    outcome: DENY
+    rank: 23
+    when: "cond.deliver_by != '' && cond.promised_by != '' && cond.promised_by > cond.deliver_by"
+    reason: "Promised delivery {cond.promised_by|date}; signed deadline {cond.deliver_by|date}."
+
+  - id: conditions.item_condition
+    title: Item condition mismatch
+    outcome: DENY
+    rank: 19
+    when: "size(cond.bad_condition_items) > 0"
+    detail: "cond.bad_condition_items"
+    reason: "Checkout condition {detail|conditions}; signed condition {cond.item_condition}."
+
+  - id: conditions.seller_rating
+    title: Seller rating below minimum
+    outcome: DENY
+    rank: 24
+    when: "cond.min_seller_rating > 0.0 && cond.seller_rating >= 0.0 && cond.seller_rating < cond.min_seller_rating"
+    reason: "{cart.merchant.name} rated {cond.seller_rating|rating}; signed minimum {cond.min_seller_rating|rating}."
+
+  - id: conditions.seller_rating_unknown
+    title: Seller rating unavailable
+    outcome: ESCALATE
+    rank: 38
+    when: "cond.min_seller_rating > 0.0 && cond.seller_rating < 0.0"
+    reason: "No registry rating for {cart.merchant.name}; signed minimum {cond.min_seller_rating|rating}."

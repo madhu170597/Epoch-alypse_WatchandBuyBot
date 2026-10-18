@@ -1,0 +1,11 @@
+# Credentials and demo signing keys: never committed, never deployed
+.secrets/
+*-key.json
+.env
+.demo/
+# Local environment and caches
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.DS_Store

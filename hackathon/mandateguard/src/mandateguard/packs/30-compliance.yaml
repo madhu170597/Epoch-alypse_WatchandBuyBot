@@ -1,0 +1,16 @@
+# Compliance pack. Packs are plain files: add one to this directory and the engine loads it on the next
+# decision, remove it and its rules stop applying. No code change, no redeploy of the logic.
+pack: compliance
+version: 3
+owner: risk-and-compliance
+approved_by: head-of-payments-risk
+effective: 2026-10-14
+description: Stored-value instruments cannot be bought unattended.
+rules:
+  - id: compliance.no_stored_value
+    title: Stored value requires customer
+    outcome: DENY
+    rank: 21
+    when: "cart.items.exists(i, i.category == 'giftcard' || i.sku.startsWith('GIFT-'))"
+    detail: "cart.items.filter(i, i.category == 'giftcard' || i.sku.startsWith('GIFT-'))"
+    reason: "Stored-value items require the customer to be present: {detail|items}."

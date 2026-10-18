@@ -1,0 +1,135 @@
+# Mandate pack: hard bounds from the mandate the user signed, and the integrity of the AP2 chain.
+# Every DENY here is final; no model and no human reply can override it.
+pack: mandate
+version: 5
+owner: risk-and-compliance
+approved_by: head-of-payments-risk
+effective: 2026-10-14
+description: Single use, replay, signatures, amount, merchant, payee, items, price range, expiry.
+rules:
+  - id: mandate.already_used
+    title: Mandate already consumed
+    outcome: DENY
+    rank: 5
+    when: "mandate.consumed"
+    reason: "Single-use mandate already consumed by a prior purchase."
+
+  - id: mandate.replayed_authorization
+    title: Authorization replayed
+    outcome: DENY
+    rank: 6
+    when: "replay.payment_nonce_seen || replay.closed_reference_seen"
+    reason: "Payment authorization was presented before; each authorization is single-use."
+
+  - id: mandate.chain_invalid
+    title: Mandate signature invalid
+    outcome: DENY
+    rank: 8
+    when: "size(ap2.chain_errors) > 0"
+    detail: "ap2.chain_errors"
+    reason: "AP2 mandate chain verification failed: {detail|first}"
+
+  - id: mandate.checkout_altered
+    title: Checkout altered after signing
+    outcome: DENY
+    rank: 10
+    when: "ap2.merchant_known && !ap2.merchant_signature_valid"
+    reason: "Checkout content does not match {cart.merchant.name}'s signature."
+
+  - id: mandate.amount_mismatch
+    title: Payment amount mismatch
+    outcome: DENY
+    rank: 12
+    when: "payment.amount_minor != cart.total_minor"
+    reason: "Payment amount {payment.amount_minor|money} differs from the signed cart total {cart.total_minor|money}."
+
+  - id: mandate.wrong_checkout
+    title: Checkout reference mismatch
+    outcome: DENY
+    rank: 13
+    when: "payment.transaction_id != cart.hash"
+    reason: "Payment authorization references a different checkout."
+
+  - id: mandate.currency
+    title: Currency mismatch
+    outcome: DENY
+    rank: 14
+    when: "payment.currency != mandate.currency || cart.currency != mandate.currency"
+    reason: "Checkout currency {cart.currency}; mandate currency {mandate.currency}."
+
+  - id: mandate.merchant_not_authorized
+    title: Merchant not authorized
+    outcome: DENY
+    rank: 15
+    when: "!(cart.merchant.id in mandate.allowed_merchant_ids)"
+    reason: "{cart.merchant.name} ({cart.merchant.website}) is not an authorized merchant for this mandate."
+
+  - id: mandate.payee_not_authorized
+    title: Payee not authorized
+    outcome: DENY
+    rank: 16
+    when: "!(payment.payee.id in mandate.allowed_payee_ids)"
+    reason: "Payee {payment.payee.name} is not authorized for this mandate."
+
+  - id: mandate.unauthorized_items
+    title: Items not in mandate
+    outcome: DENY
+    rank: 17
+    when: "cart.items.exists(i, !(i.sku in mandate.allowed_skus))"
+    detail: "cart.items.filter(i, !(i.sku in mandate.allowed_skus))"
+    reason: "Cart contains items outside the mandate: {detail|items}."
+
+  - id: mandate.price_out_of_range
+    title: Amount outside signed range
+    outcome: DENY
+    rank: 25
+    when: "cart.total_minor > mandate.max_minor || cart.total_minor < mandate.min_minor"
+    reason: "Cart total {cart.total_minor|money}; signed range {mandate.min_minor|money} to {mandate.max_minor|money}."
+
+  - id: mandate.expired
+    title: Mandate expired
+    outcome: DENY
+    rank: 26
+    when: "ctx.now > mandate.exp"
+    reason: "Mandate expired {mandate.exp|time}."
+
+  - id: mandate.agent_key_mismatch
+    title: Agent key not delegated
+    outcome: DENY
+    rank: 27
+    when: "mandate.expected_agent_key_thumbprint != '' && mandate.agent_key_thumbprint != mandate.expected_agent_key_thumbprint"
+    reason: "Mandate is delegated to a different agent key."
+
+  - id: mandate.merchant_key_unknown
+    title: Unregistered merchant key
+    outcome: DENY
+    rank: 30
+    when: "!ap2.merchant_known"
+    reason: "Checkout signed with key {ap2.merchant_kid}, which is not in the merchant registry."
+
+  - id: mandate.ap2_payment_constraints
+    title: AP2 payment constraint failed
+    source: AP2 SDK · amounts in minor units
+    outcome: DENY
+    rank: 35
+    when: "size(ap2.payment_violations) > 0"
+    detail: "ap2.payment_violations"
+    reason: "{detail|ap2}."
+
+  - id: mandate.ap2_checkout_constraints
+    title: AP2 checkout constraint failed
+    source: AP2 SDK · amounts in minor units
+    outcome: DENY
+    rank: 36
+    when: "size(ap2.checkout_violations) > 0"
+    detail: "ap2.checkout_violations"
+    reason: "{detail|ap2}."
+
+  - id: mandate.within_mandate
+    title: Within mandate
+    outcome: ALLOW
+    when: >-
+      ap2.ok && size(ap2.errors) == 0 && ap2.merchant_signature_valid
+      && size(ap2.payment_violations) == 0 && size(ap2.checkout_violations) == 0
+      && !mandate.consumed && cart.item_count > 0
+    reason: "Merchant, items, amount, payee and expiry are within the signed mandate."

@@ -1,0 +1,30 @@
+# One image for any A2A role service. Pick the role at build time:
+#   gcloud run deploy merchant-agent --source . \
+#     --build-arg ROLE=merchant_agent ... (Dockerfile.role)
+# Valid ROLE values: merchant_agent | credentials_provider_agent |
+#                    merchant_payment_processor_agent
+# Build context = the AP2 repo root.
+FROM python:3.12-slim
+
+# git is needed by `uv sync` to fetch the x402-a2a git dependency.
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir uv==0.13.1
+
+WORKDIR /app
+COPY . /app
+
+# Build the workspace venv (ap2 SDK + samples) exactly as local dev.
+RUN uv sync --all-packages
+
+ARG ROLE
+ENV ROLE=${ROLE} \
+    A2A_HOST=0.0.0.0 \
+    PYTHONPATH=/app/code/samples/python/src \
+    PORT=8080
+
+WORKDIR /app/code/samples/python/src
+# common/watch_log.py writes .logs/watch.log relative to cwd; create the dir.
+RUN mkdir -p /app/code/samples/python/src/.logs
+# Cloud Run sends $PORT; common/server.py honors it (overrides the role's default).
+CMD exec uv run --project /app python -m roles.${ROLE}

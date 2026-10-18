@@ -1,0 +1,10 @@
+# Only pyproject.toml and src/ go into the image. Demo keys never leave this machine.
+.gcloudignore
+.gitignore
+.venv/
+.demo/
+.pytest_cache/
+__pycache__/
+*.egg-info/
+tests/
+scripts/

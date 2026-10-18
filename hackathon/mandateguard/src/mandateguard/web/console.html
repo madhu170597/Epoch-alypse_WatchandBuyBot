@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MandateGuard Console</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 rx=%273%27 fill=%27%2318181b%27/%3E%3Cpath d=%27M4.2 8.4l2.4 2.4 5.2-5.4%27 stroke=%27%23fafafa%27 stroke-width=%271.8%27 fill=%27none%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="console">
+<header class="top">
+  <div class="brand">MandateGuard</div>
+  <nav class="views" aria-label="Views">
+    <button type="button" data-view="decisions" aria-current="page">Decisions</button>
+    <button type="button" data-view="ledger">Audit log</button>
+  </nav>
+  <span class="envtag" id="env"></span>
+  <div class="spacer"></div>
+  <div class="chain"><span id="chain" class="faint">Loading ledger</span><button class="btn sm" id="verify" type="button">Verify ledger</button></div>
+</header>
+<div class="layout">
+  <section class="pane list" aria-label="Records">
+    <div class="stats num" id="stats"></div>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Filter" id="filters"></div>
+      <input class="search" id="q" type="search" placeholder="Search" aria-label="Search">
+      <span class="live" id="live">Live</span>
+    </div>
+    <table class="log">
+      <thead><tr id="head-row"></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden><h2>No records</h2></div>
+  </section>
+  <section class="pane" aria-label="Detail">
+    <div class="detail" id="detail"><div class="empty"><h2>No record selected</h2></div></div>
+  </section>
+</div>
+<script type="module" src="/static/console.js"></script>
+</body>
+</html>

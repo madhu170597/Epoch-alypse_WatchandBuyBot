@@ -1,0 +1,124 @@
+# Fraud pack: risk the signed mandate cannot express on its own.
+# Counterparty identity, the human-not-present spend envelope, page injections, and agent drift.
+pack: fraud
+version: 5
+owner: risk-and-compliance
+approved_by: head-of-payments-risk
+effective: 2026-10-14
+description: Look-alike merchants, autonomous spend limits, injected pages, plan drift, tool allow-list.
+rules:
+  - id: fraud.disallowed_tool
+    title: Tool not permitted
+    outcome: DENY
+    rank: 9
+    when: "size(trace.disallowed_tools) > 0"
+    detail: "trace.disallowed_tools"
+    reason: "Agent invoked tools outside its allow-list: {detail|join}."
+
+  - id: fraud.payee_homoglyph
+    title: Merchant name homoglyph
+    outcome: DENY
+    rank: 18
+    when: "payee.skeleton_collision"
+    reason: "“{payee.name}” is a character-substitution variant of registered merchant {payee.lookalike_name}."
+
+  - id: fraud.injection_high
+    title: Embedded instructions in page
+    outcome: DENY
+    rank: 19
+    when: "screen.confidence == 'HIGH'"
+    reason: "Merchant page contains concealed instructions addressed to the agent or to MandateGuard."
+
+  - id: fraud.payee_changed
+    title: Payee changed after page read
+    outcome: DENY
+    rank: 19
+    when: "trace.payee_changed_after_page_read"
+    reason: "Planned payee {trace.plan_payee_id}; payment payee {payment.payee.id} after a page read."
+
+  - id: fraud.shipping_changed
+    title: Ship-to changed after page read
+    outcome: DENY
+    rank: 19
+    when: "trace.shipping_changed_after_page_read"
+    reason: "Shipping address changed after a merchant page was read."
+
+  - id: fraud.items_not_in_plan
+    title: Items outside committed plan
+    outcome: ESCALATE
+    rank: 21
+    when: "size(trace.items_not_in_plan) > 0"
+    detail: "trace.items_not_in_plan"
+    reason: "Added after a page read and absent from the plan: {detail|join}."
+
+  - id: fraud.hnp_single_txn_cap
+    title: Unattended transaction limit
+    outcome: DENY
+    rank: 22
+    when: "cart.total_minor > ctx.hnp_txn_cap_minor"
+    reason: "Amount {cart.total_minor|money} exceeds the unattended transaction limit of {ctx.hnp_txn_cap_minor|money}."
+
+  - id: fraud.payee_lookalike
+    title: Merchant look-alike
+    outcome: ESCALATE
+    rank: 31
+    when: "payee.lookalike_of != '' && payee.lookalike_of != payee.id"
+    reason: "“{payee.name}” resembles registered merchant {payee.lookalike_name} ({payee.name_similarity|pct} name similarity)."
+
+  - id: fraud.payee_unknown
+    title: Unregistered merchant
+    outcome: ESCALATE
+    rank: 32
+    when: "!payee.known && payee.first_time_for_user"
+    reason: "First payment to {payee.name}; merchant not in registry."
+
+  - id: fraud.payee_mixed_script
+    title: Mixed-script merchant name
+    outcome: ESCALATE
+    rank: 33
+    when: "payee.mixed_script"
+    reason: "“{payee.name}” combines characters from multiple scripts."
+
+  - id: fraud.hnp_velocity
+    title: Hourly unattended limit
+    outcome: ESCALATE
+    rank: 40
+    when: "ctx.velocity_1h_minor + cart.total_minor > ctx.hnp_velocity_cap_minor"
+    detail: "ctx.velocity_1h_minor + cart.total_minor"
+    reason: "Unattended spend in the last hour would reach {detail|money}; limit {ctx.hnp_velocity_cap_minor|money}."
+
+  - id: fraud.injection_suspected
+    title: Agent-directed page text
+    outcome: ESCALATE
+    rank: 41
+    when: "screen.confidence == 'LOW' || screen.confidence == 'MEDIUM' || (screen.addressed_to_guard && screen.confidence != 'HIGH')"
+    reason: "Merchant page contains text addressed to automated agents."
+
+  - id: fraud.plan_missing
+    title: No plan before browsing
+    outcome: ESCALATE
+    rank: 45
+    when: "!trace.plan_before_first_page"
+    reason: "No plan recorded before the first page read; drift cannot be assessed."
+
+  - id: fraud.plan_rewritten
+    title: Plan altered after commitment
+    outcome: DENY
+    rank: 16
+    when: "trace.plan_witnessed && trace.trace_plan_present && !trace.plan_matches_witnessed"
+    reason: "Plan reported in the trace differs from the plan committed to MandateGuard."
+
+  - id: fraud.plan_not_witnessed
+    title: Plan not committed
+    outcome: ESCALATE
+    rank: 60
+    when: "ctx.require_witnessed_plan && !trace.plan_witnessed"
+    reason: "No plan committed to MandateGuard before browsing."
+
+  - id: fraud.page_differs
+    title: Page differs from merchant site
+    outcome: ESCALATE
+    rank: 25
+    when: "pages.differs > 0"
+    detail: "pages.differing_urls"
+    reason: "Agent-reported page differs from MandateGuard's copy: {detail|join}."

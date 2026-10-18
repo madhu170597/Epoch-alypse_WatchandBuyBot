@@ -1,0 +1,23 @@
+# Cloud Run image for the shopping agent (ADK + A2A, shopping_agent_v2).
+# Build context = the AP2 repo root:
+#   gcloud run deploy shopping-agent --source . --dockerfile Dockerfile.agent ...
+FROM python:3.12-slim
+
+# git is needed by `uv sync` to fetch the x402-a2a git dependency.
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir uv==0.13.1
+
+WORKDIR /app
+COPY . /app
+
+# Build the workspace venv (ap2 SDK + samples) exactly as local dev.
+RUN uv sync --all-packages
+
+ENV A2A_HOST=0.0.0.0 \
+    PYTHONPATH=/app/code/samples/python/src \
+    PORT=8080
+
+WORKDIR /app/code/samples/python/src/roles/shopping_agent_v2
+# run_server.py honors $PORT and binds A2A_HOST (0.0.0.0 on Cloud Run).
+CMD exec uv run --project /app python run_server.py

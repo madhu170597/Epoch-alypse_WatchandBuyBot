@@ -1,0 +1,36 @@
+{
+  "approvals": [
+    {
+      "pack": "mandate",
+      "version": "5",
+      "file_sha256": "0ca6301e9aefeb23f9af556f85af2924d55f1f23346cc17f79c3abf3ca0d71e2",
+      "approved_by": "head-of-payments-risk",
+      "approved_at": "2026-10-14",
+      "signature": "MEYCIQCtAKswPjwFYsqF7Bc73RfRmeV88yH3MEe1eY165bK0DwIhAKWuUkyIRoiLZJOKk1EIE3j6dLjZ_geu21Ao0g0Ku_bu"
+    },
+    {
+      "pack": "conditions",
+      "version": "2",
+      "file_sha256": "e4b3abf317748f9489fc1d9429e3158fd1633a4e3906301e0c094529d7881ea8",
+      "approved_by": "head-of-payments-risk",
+      "approved_at": "2026-10-14",
+      "signature": "MEQCIHehXTXdmAGfFRWde-sOZOY0-_Btz5cB_qzZiPD4Km-UAiB7kBkP8f0kcf9_Jg7h5Vpy2wY-GTvhDOaGIadWR3Jvbg"
+    },
+    {
+      "pack": "fraud",
+      "version": "5",
+      "file_sha256": "58bbe2fb1206f795135e79bd5df621428d09b59d4df17f3ab0d0fa93ee5489d3",
+      "approved_by": "head-of-payments-risk",
+      "approved_at": "2026-10-14",
+      "signature": "MEYCIQCf1pbUZsDWklUUJJtC1DyojBlshhfzu-SzogO3CbAmqAIhALtR2iWO_I3EVX1Im-JzbhCEbBoQuSJXMpF0UzWNYyoC"
+    },
+    {
+      "pack": "compliance",
+      "version": "3",
+      "file_sha256": "7b45ea69a83d2bd15d0e7da83885cc2f0a444ca59618fec4bbbe63fe80f6e99e",
+      "approved_by": "head-of-payments-risk",
+      "approved_at": "2026-10-14",
+      "signature": "MEQCIHAu1EOs-2GzpoJ7o3aA0oUy-E-UqUMTTmAYfxy5nFDoAiBS3sKez48YPvk75Q7fMykRIdFsa6eQEhiCxwJkIPhonQ"
+    }
+  ]
+}

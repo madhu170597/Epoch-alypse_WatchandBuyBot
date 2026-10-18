@@ -1,0 +1,14 @@
+# Generic image build: pick the Dockerfile + build-args.
+#   gcloud builds submit <ctx> --config cloudbuild.build.yaml \
+#     --substitutions=_DOCKERFILE=Dockerfile.role,_ROLE=merchant_agent,_IMAGE=...
+# _EXTRA_ARG is one more KEY=VALUE build-arg (e.g. VITE_AGENT_URL=... for the web app).
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ['build', '-f', '${_DOCKERFILE}', '--build-arg', 'ROLE=${_ROLE}', '--build-arg', '${_EXTRA_ARG}', '-t', '${_IMAGE}', '.']
+images: ['${_IMAGE}']
+substitutions:
+  _ROLE: none
+  _EXTRA_ARG: UNUSED=1
+options:
+  machineType: E2_HIGHCPU_8
+  substitutionOption: ALLOW_LOOSE

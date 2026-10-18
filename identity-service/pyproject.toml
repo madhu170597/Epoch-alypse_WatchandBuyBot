@@ -1,0 +1,20 @@
+[project]
+name = "identity-service"
+version = "0.1.0"
+description = "Identity service: Firebase email+SMS-MFA auth, WebAuthn passkeys, Telegram linking"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.120.2",
+    "uvicorn==0.38.0",
+    "firebase-admin==7.1.0",
+    "webauthn==2.7.0",
+    "pydantic==2.12.5",
+    "pydantic-settings==2.12.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]

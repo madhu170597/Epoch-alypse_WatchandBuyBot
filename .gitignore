@@ -1,0 +1,39 @@
+# Python
+**/.venv/
+**/__pycache__/
+*.pyc
+**/.pytest_cache/
+**/*.egg-info/
+
+# Node / web
+**/node_modules/
+**/dist/
+
+# Secrets & env (never commit)
+.env
+**/.env
+.env.*
+**/.env.*
+!**/.env.example
+vertex-key.json
+*-key.json
+*-sa.json
+service-account*.json
+*.p12
+**/.secrets/
+
+# Runtime scratch
+**/.temp-db/
+**/.logs/
+**/.demo/
+uv.lock.orig
+
+# OS / editor
+.DS_Store
+**/.DS_Store
+.vscode/
+
+# Local tooling output and office files
+.archify/
+~$*
+*.docx

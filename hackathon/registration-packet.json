@@ -1,0 +1,28 @@
+{
+  "agent": {
+    "agent_id": "shopper-agent",
+    "public_jwk": {
+      "crv": "P-256",
+      "kty": "EC",
+      "x": "0INjq9iv5hr2dyMPr9wbpj3-rTxBxudFiG5FVJ_pzns",
+      "y": "9HfcZwlxWiqpX6ehdT2S2uvcoKLa9pFhm2cXgYJrQcU"
+    },
+    "key_thumbprint": "H4pgUnKBSop2ugynqnPX2hx2xTzQ1Wr4wYh3jB361zk"
+  },
+  "merchant_1": {
+    "id": "merchant_1",
+    "name": "Demo Store",
+    "kid": "merchant-key-1",
+    "public_jwk": {
+      "crv": "P-256",
+      "kty": "EC",
+      "x": "cYpy_19QfFEfZIAbjfUpPlDxzjaZAsRkzVL5a9uEfrI",
+      "y": "ES6wc0DCtPYRytO-lB5i7t1QpPNLZrhWru7xpVC8x1o"
+    },
+    "website": "<PUBLIC_HTTPS_URL \u2014 fill after deploy>",
+    "rating": 4.8
+  },
+  "our_service_accounts": {
+    "current_single_sa": "teammate-vertex-sa@hackathon-proto-mk26.iam.gserviceaccount.com"
+  }
+}

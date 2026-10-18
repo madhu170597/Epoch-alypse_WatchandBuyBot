@@ -1,0 +1,9 @@
+.git
+.venv
+**/__pycache__
+**/*.pyc
+code/web-client/node_modules
+code/web-client/dist
+**/.temp-db
+**/.logs
+uv.lock.orig
